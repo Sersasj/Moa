@@ -5,12 +5,16 @@ Created on Sat Mar 19 20:11:06 2022
 @author: sergi
 """
 import sys
-
+import math
 class Vertice:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-
+        
+        
+######################################
+#PODE REFATORAR AS COISA AI SE QUISER#
+######################################
 
 
 # Armazena entrada 
@@ -40,7 +44,7 @@ def populate(text):
     for element in text:
         element = element.split(" ")
         element = element[1:]  
-        list_vertice.append(Vertice(element[0], element[1]))
+        list_vertice.append(Vertice(int(element[0]), int(element[1])))
     return list_vertice
 
 # Inicializa vertices como não visitado
@@ -52,12 +56,26 @@ def init_false(list_vertice):
         list_aux.append([vertice,False])
     return list_aux    
 
-# percorre os não percorridos, acha o menor
-def find_nearest(visited_list):
-    
-    
-    print("a")                
-    
+#ACHEI MUITO ESQUISITO ISSO AQUIM DEVE TER COMO FAZER MELHOR
+# percorre os não visitados, acha o menor
+def find_nearest(visited_list, vertice_index):
+    # acha o primeiro não visitado e assume como o menor
+    count = 0
+    while visited_list[count][1] == True:
+        count+=1
+        
+    min_index = count
+    min_value = math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [visited_list[min_index][0].x, visited_list[min_index][0].y])
+    count2 = 0
+
+    # percorre outros vertices procurando um menor
+    for vertice in visited_list:
+        if (vertice[1] == False and math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [vertice[0].x,vertice[0].y]) < min_value):
+            min_value = math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [vertice[0].x, vertice[0].y])
+            min_index = count2 
+        count2+=1    
+    return min_index
+
 # Metodo construtivo 
 # Neareast Neighbor
 def nearest(list_vertice):
@@ -67,9 +85,12 @@ def nearest(list_vertice):
     # Inicia no primeiro vertice
     visited_list[0][1] = True
     path = [0]
-    print(visited_list)
-    #while len(path) < len(list_vertice):
-       # print("a")
+    #print(visited_list)
+    for i in range(len(list_vertice)-1):
+        near = find_nearest(visited_list, path[i])
+        path.append(near)
+        visited_list[near][1] = True
+    print(path)
     
 
 def main():
