@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 19 20:11:06 2022
+from sys import stdin
 
-@author: sergi
-"""
 import sys
 import math
 class Vertice:
@@ -11,36 +8,29 @@ class Vertice:
         self.x = x
         self.y = y
         
-        
-######################################
-#PODE REFATORAR AS COISA AI SE QUISER#
-######################################
 
-
-# Armazena entrada 
 def read_input():
-    with open(sys.argv[1], 'r') as f:
-        content = f.read()
-    return content
+  input_str = []
+  for line in stdin:
+    input_str.append(line.replace("\n",""))    
+    if(line.replace("\n","") == "EOF"):
+      break
+  return input_str[6:len(input_str)-1]
 
-# Remove 6 primeiras linhas e EOF / horripilante
-def remove_six(text):  
-    count_n = 0
-    count_qnt = 0
-    for x in text:
-        count_qnt += 1
-        if x == '\n':
-            count_n += 1
-        if count_n == 6:
-            break
+"""
+def read_input():
+  with open(sys.argv[1], 'r') as f:
+    for i, line in enumerate(f):
+      if i == 5:          
+        content = f.read()
+        break;
         
-    return text[count_qnt:len(text)-3]
+  return content[:len(content)-4]
+"""
 
 # Cria lista com os Vertices
 def populate(text):
     list_vertice = []
-    text = text.split('\n')
-    text.remove("")
     for element in text:
         element = element.split(" ")
         element = element[1:]  
@@ -56,6 +46,10 @@ def init_false(list_vertice):
         list_aux.append([vertice,False])
     return list_aux    
 
+def dist(x1,y1,x2,y2):
+  resp = math.dist([x1,y1],[x2,y2])
+  return resp
+  
 #ACHEI MUITO ESQUISITO ISSO AQUIM DEVE TER COMO FAZER MELHOR
 # percorre os não visitados, acha o menor
 def find_nearest(visited_list, vertice_index):
@@ -63,9 +57,10 @@ def find_nearest(visited_list, vertice_index):
     count = 0
     while visited_list[count][1] == True:
         count+=1
-        
     min_index = count
     min_value = math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [visited_list[min_index][0].x, visited_list[min_index][0].y])
+
+  
     count2 = 0
 
     # percorre outros vertices procurando um menor
@@ -73,31 +68,35 @@ def find_nearest(visited_list, vertice_index):
         if (vertice[1] == False and math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [vertice[0].x,vertice[0].y]) < min_value):
             min_value = math.dist([visited_list[vertice_index][0].x, visited_list[vertice_index][0].y], [vertice[0].x, vertice[0].y])
             min_index = count2 
-        count2+=1    
-    return min_index
+        count2+=1 
+  
+    return min_index, min_value
 
 # Metodo construtivo 
 # Neareast Neighbor
 def nearest(list_vertice):
-    path = []
+    path = [] 
+    path_w = []
     
     visited_list = init_false(list_vertice)
     # Inicia no primeiro vertice
     visited_list[0][1] = True
     path = [0]
-    #print(visited_list)
     for i in range(len(list_vertice)-1):
-        near = find_nearest(visited_list, path[i])
+        near, w = find_nearest(visited_list, path[i])
         path.append(near)
+        path_w.append(w)
         visited_list[near][1] = True
-    print(path)
+    #Volta pro inicio
+    path_w.append(dist(list_vertice[path[0]].x, list_vertice[path[0]].y, list_vertice[path[len(path)-1]].x, list_vertice[path[len(path)-1]].y))
+    path.append(path[0])
+
+    print(sum(path_w))
     
 
 def main():
     content = read_input()
-    content = remove_six(content)
     list_vertice = populate(content)
     nearest(list_vertice)
-    #print(list_vertice)
 if __name__ == '__main__':
    main()
