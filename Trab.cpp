@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <random>
 #include <chrono>
+#include <fstream>
+
 using namespace std;
 using namespace std::chrono;
 
@@ -115,6 +117,9 @@ float cost2(vector<int> path, float **matrix){
 }
 
 vector<int> two_opt(vector<int> path, float **matrix){
+  ofstream MyFile("Saida_88k_2opt.txt");
+  time_t start, end;
+  time(&start);
   vector<int> best = path;
   bool improved = true;
   while (improved){
@@ -134,14 +139,22 @@ vector<int> two_opt(vector<int> path, float **matrix){
             new_path[x] = new_path_slice[x-i];
         }         
         if (cost2(new_path, matrix) < cost2(path, matrix)){
-            best = new_path;        
-            improved = true;
+            best = new_path;    
+            MyFile << cost2(new_path, matrix) << endl;
+            time(&end);
+            double time_taken = double(end - start);
             path = best;
+            //if(time_taken > 7200){
+            //  return best;
+            //}
+            improved = true;
             j = i;
         }
       }
     }
   }
+    MyFile.close();
+
   return best;
 }
 
@@ -185,22 +198,28 @@ int reverse_better(vector<int>& new_path, int i, int j, int k, float **matrix){
     
 }
 
-vector<int> three_opt(vector<int> &path, float **matrix){
+vector<int> three_opt(vector<int> path, float **matrix){
+    ofstream MyFile("Saida_pla7397_3opt.txt");
+
     while(true){
         int delta = 0;
         for(long unsigned int i = 1; i < path.size() ; i++){
             for(long unsigned int j = i + 1; j < path.size(); j++){
                 for(long unsigned int k = j + 1; k < path.size(); k++){
-                    delta += reverse_better(path, i, j, k, matrix);
+                    int aux = reverse_better(path, i, j, k, matrix);
+                    delta += aux;
+                    if (aux != 0){
+                        MyFile << cost2(path,matrix) << endl;
 
+                    }
                 }
             }
         }
-  
       if (delta >= 0){
         break;
       }
     }
+    MyFile.close();
   return path;
 }
 
@@ -219,11 +238,11 @@ int main()
 
     // adiciona distancias na matriz
     create_matrix(matrix, vertex_list);
-//-------------------------- Neareast ----------------------------//
-    auto start_near_construct = high_resolution_clock::now();   
-
-    vector<int> path;
     
+//-------------------------- Neareast ----------------------------//
+  /*
+    auto start_near_construct = high_resolution_clock::now();  
+    vector<int> path;    
     path.push_back(0);
     vertex_list[0].visited = true;
     for(long unsigned int i = 0; i < vertex_list.size(); i++){
@@ -231,27 +250,36 @@ int main()
         path.push_back(nearest_index);
         vertex_list[nearest_index].visited = true;
     }
-    auto stop_near_construct = high_resolution_clock::now();   
-    auto start_near_opt = high_resolution_clock::now();   
+    auto stop_near_construct = high_resolution_clock::now();  
+    cout << "Nearest " << cost2(path, matrix) << endl;
 
+    
+    auto start_near_opt2 = high_resolution_clock::now();
     vector <int> path2;
     path2 = two_opt(path, matrix);
+    auto stop_near_opt2 = high_resolution_clock::now();
+        cout << "custo 2opt N "  << cost2(path2, matrix) << endl;
+
+
+    auto start_near_opt3 = high_resolution_clock::now();   
     vector<int> path_3opt;
     path_3opt = three_opt(path,matrix);
+    auto stop_near_opt3 = high_resolution_clock::now(); 
     //for (auto & element : path2){
     //  cout << element << " " ;
     //}    
-    auto stop_near_opt = high_resolution_clock::now();   
-    cout << "Custo 3opt"  << cost2(path_3opt, matrix) << endl;
-    cout << "custo 2opt "  << cost2(path2, matrix) << endl;
-    auto duration_construct_near = duration_cast<microseconds>(stop_near_construct - start_near_construct);
-    auto duration_near_opt = duration_cast<microseconds>(stop_near_opt - start_near_opt);
-    auto duration_near_total = duration_cast<microseconds>(stop_near_opt - start_near_construct);
-    
-    cout << duration_construct_near.count() << " " << duration_near_opt.count() << " " << duration_near_total.count() << " " << endl;    
-//-------------------------- Random ---------------------------// 
-    auto start_random_construct = high_resolution_clock::now();   
+    cout << "Custo 3opt N "  << cost2(path_3opt, matrix) << endl;
 
+    auto duration_construct_near = duration_cast<microseconds>(stop_near_construct - start_near_construct);
+    auto duration_near_opt2 = duration_cast<microseconds>(stop_near_opt2 - start_near_opt2);    
+    auto duration_near_opt3 = duration_cast<microseconds>(stop_near_opt3 - start_near_opt3);
+    
+    cout << duration_construct_near.count() << " " << duration_near_opt2.count() << " " << duration_near_opt3.count() << " " << endl;    
+
+    */
+//-------------------------- Random ---------------------------// 
+  
+    auto start_random_construct = high_resolution_clock::now();   
     vector<int> path3;
     srand(time(0));
     random_shuffle(vertex_list.begin(), vertex_list.end());
@@ -261,23 +289,29 @@ int main()
     path3.push_back(path3[0]);
     auto stop_random_construct = high_resolution_clock::now();
     
-    auto start_random_opt = high_resolution_clock::now();
-
+    auto start_random_opt2 = high_resolution_clock::now();
     vector <int> path4;
     path4 = two_opt(path3, matrix);
     //for (auto & element : path2){
     //  cout << element << " " ;
     //}
-    auto stop_random_opt = high_resolution_clock::now();
+    auto stop_random_opt2 = high_resolution_clock::now();
+    auto start_random_opt3 = high_resolution_clock::now();
+    //vector <int> path_3opt_random;
+    //path_3opt_random = three_opt(path3,matrix);
+    auto stop_random_opt3 = high_resolution_clock::now();
 
-    cout <<"random " << cost2(path4, matrix) << endl;
+    cout << "random " << cost2(path3, matrix) << endl;
+    cout << "Custo 2opt R " << cost2(path4, matrix) << endl;
+    //cout << "Custo 3opt R " << cost2(path_3opt_random, matrix) << endl;
+    
 
     auto duration_construct_random = duration_cast<microseconds>(stop_random_construct - start_random_construct);
-    auto duration_random_opt = duration_cast<microseconds>(stop_random_opt - start_random_opt);
-    auto duration_random_total = duration_cast<microseconds>(stop_random_opt - start_random_construct);
+    auto duration_random_opt = duration_cast<microseconds>(stop_random_opt2 - start_random_opt2);
+    auto duration_random_total = duration_cast<microseconds>(stop_random_opt3 - start_random_opt3);
     
     cout << duration_construct_random.count() << " " << duration_random_opt.count() << " " << duration_random_total.count() << " " << endl;
-
+    
 // -------------------------------------------------------------//    
     
 
